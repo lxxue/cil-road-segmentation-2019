@@ -4,6 +4,10 @@ Team Member: Jingyuan Ma, Yongqi Wang, Zhi Ye,
 
 This repository contains the tools and models for the the course project of [Computational Intelligence Lab](http://da.inf.ethz.ch/teaching/2019/CIL/project.php) (Spring 2019): Road Segmentaion.
 
+Credit:
+
+[TorchSeg](https://github.com/ycszen/TorchSeg/) for the structure of repository
+
 ## Prerequisites
 
 In our setting, the models are being run inside a deepo [Docker container](https://hub.docker.com/r/ufoym/deepo/) (using the default tag: `latest`)
@@ -25,7 +29,7 @@ docker exec -it cu100 bash
 # follow instructions below
 git clone https://github.com/wyq977/cil-road-segmentation-2019.git
 cd cil-road-segmentation-2019
-cd model/resnet50
+cd model/cil-resnet50
 # train with CUDA device 0
 python train.py -d 0
 # eval using the default last epoh
@@ -113,6 +117,17 @@ python pred.py -d 0 -p ../../cil-road-segmentation-2019/val_pred/ -e log/snapsho
 ```shell
 cd ../../cil-road-segmentation-2019/
 python mask_to_submission.py --name submission -p pred/
+```
+
+### Distributed Training
+
+All models but u-net support distributed training using `torch.distributed.launch`
+
+For each run:
+
+```shell
+export NGPUS=8
+python -m torch.distributed.launch --nproc_per_node=$NGPUS train.py
 ```
 
 ## Structure
