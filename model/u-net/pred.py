@@ -10,7 +10,6 @@ import torch.multiprocessing as mp
 
 from config import config
 from utils.pyt_utils import ensure_dir, link_file, load_model, parse_devices
-# from utils.visualize import print_iou, show_img
 from engine.evaluator import Evaluator
 from engine.logger import get_logger
 from seg_opr.metric import hist_info, compute_score
@@ -28,7 +27,7 @@ class SegEvaluator(Evaluator):
 
         img = cv2.resize(img, (config.image_height,config.image_width),
                          interpolation=cv2.INTER_LINEAR)
-
+        # predicted labels
         pred = self.whole_eval(img,
                                (config.image_height // config.gt_down_sampling,
                                 config.image_width // config.gt_down_sampling),
@@ -51,6 +50,7 @@ class SegEvaluator(Evaluator):
         return results_dict
 
     def compute_metric(self, results):
+        """No metric is calculated during prediction."""
         return 'no result'
 
 
