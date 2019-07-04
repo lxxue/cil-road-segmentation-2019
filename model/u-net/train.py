@@ -34,14 +34,15 @@ with Engine(custom_parser=parser) as engine:
 
     # data loader
     train_loader, train_sampler = get_train_loader(engine, Cil)
-
+    # load model    
     model = Network_UNet(out_planes=config.num_classes, is_training=True)
+    # initialize parameters
     init_weight(model.layers, nn.init.kaiming_normal_,
                 BatchNorm2d, config.bn_eps, config.bn_momentum,
                 mode='fan_in', nonlinearity='relu')
 
     base_lr = config.lr
-
+    # group weight initialization on all layers
     params_list = []
     params_list = group_weight(params_list, model.resnet,
                                BatchNorm2d, base_lr*10)
@@ -66,14 +67,14 @@ with Engine(custom_parser=parser) as engine:
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
-
+    # register state dictations
     engine.register_state(dataloader=train_loader, model=model,
                           optimizer=optimizer)
     if engine.continue_state_object:
         engine.restore_checkpoint()
-
+    
     model.train()
-
+    # start training process
     for epoch in range(engine.state.epoch, config.nepochs):
         if engine.distributed:
             train_sampler.set_epoch(epoch)
@@ -91,7 +92,6 @@ with Engine(custom_parser=parser) as engine:
 
             imgs = imgs.cuda(non_blocking=True)
             gts = gts.cuda(non_blocking=True)
-            #gts = gts.float()
             
 
             loss = model(imgs, gts)
@@ -100,6 +100,7 @@ with Engine(custom_parser=parser) as engine:
 
             loss.backward()
             optimizer.step()
+            # print information
             print_str = 'Epoch{}/{}'.format(epoch, config.nepochs) \
                         + ' Iter{}/{}:'.format(idx + 1, config.niters_per_epoch) \
                         + ' lr=%.2e' % lr \
