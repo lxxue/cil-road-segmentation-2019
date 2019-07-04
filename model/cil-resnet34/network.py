@@ -15,15 +15,18 @@ class Network_Res34(nn.Module):
         self.is_training = is_training
        
         conv_channel = 128
+        # use base model of resnet 34 from resnet.py
         self.context = resnet34(pretrained_model=None, norm_layer=BN2D, bn_eps=config.bn_eps, bn_momentum=config.bn_momentum, deep_stem=False, stem_width=64)
         self.context_refine = nn.Sequential(
                         nn.AdaptiveAvgPool2d(1),
                         ConvBnRelu(512,conv_channel, 1, 1, 0, has_bn=True, has_relu=True, has_bias=False, norm_layer=BN2D)
                 )
+        
+        # ARM for ResBlock 2,3,4 of resnet output
         arms = [AttentionRefinement(512, conv_channel, norm_layer=BN2D),
                 AttentionRefinement(256, conv_channel, norm_layer=BN2D),
                 AttentionRefinement(128, conv_channel, norm_layer=BN2D)]
-
+        # Refinement of corresponding output
         refines = [
                     ConvBnRelu(conv_channel, conv_channel, 3, 1, 1, has_bn=True, norm_layer=BN2D, has_relu=True, has_bias=False),
                     ConvBnRelu(conv_channel, conv_channel, 3, 1, 1, has_bn=True, norm_layer=BN2D, has_relu=True, has_bias=False),
@@ -33,19 +36,16 @@ class Network_Res34(nn.Module):
         
         self.arms = nn.ModuleList(arms)
         self.refines = nn.ModuleList(refines)
-
+         # Refinement on first layer of resnet output
         self.res_top_refine = ConvBnRelu(64, conv_channel//2, 3, 1, 1, has_bn=True, norm_layer=BN2D, has_relu=True, has_bias=False)
 
         self.ffm = FeatureFusion(192, conv_channel, 1, BN2D)
-        
+         # classifier for final output
         self.class_refine = nn.Sequential(
                 ConvBnRelu(conv_channel, conv_channel//2, 3, 1, 1, has_bn=True, has_relu=True, has_bias=False, norm_layer=BN2D),
                 nn.Conv2d(conv_channel//2, out_planes, kernel_size=1, stride=1, padding=0)
             )
 
-        #self.out_refine = nn.Sequential(
-        #        ConvBnRelu(conv_channel//2, out_planes, 1, 1, 0, has_bn=False, has_relu=False, has_bias=False, norm_layer=BN2D) 
-         #       )
 
         self.layers.append(self.context)
         self.layers.append(self.class_refine)
@@ -75,9 +75,9 @@ class Network_Res34(nn.Module):
         res_top = self.res_top_refine(context_out[3])
         res_combine = self.ffm(res_top, last)       
         result = self.class_refine(res_combine)
-        
+        # upsampling to original size of image
         result = F.interpolate(result, scale_factor=4, mode='bilinear', align_corners=True)
-        #x = self.out_refine(x)    
+  
         if self.is_training:
             loss = self.loss(result,gt)
             return loss
