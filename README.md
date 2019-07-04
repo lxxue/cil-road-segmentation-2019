@@ -64,6 +64,8 @@ Model dir:
 
 ### Prepare data
 
+Since the training dataset is quite small in size, we have uploaded onto our github repo. In the case of the images are stored in other directory, `config.py` under model section might be revised accordingly.
+
 With a tab-separated files specifying the path of images and groundtruth, `train.txt`, `val.txt`, `test.txt`.
 
 `train.txt` or `val.txt`:
