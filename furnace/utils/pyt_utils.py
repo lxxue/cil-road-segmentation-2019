@@ -1,4 +1,4 @@
-# encoding: utf-8
+
 import os
 import sys
 import time
@@ -13,15 +13,7 @@ from engine.logger import get_logger
 
 logger = get_logger()
 
-model_urls = {
-    'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
-    'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
-    'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
-    'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
-    'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
-}
-
-
+# function for loss distribution for distributed training
 def all_reduce_tensor(tensor, op=dist.ReduceOp.SUM, world_size=1):
     tensor = tensor.clone()
     dist.all_reduce(tensor, op)
@@ -29,6 +21,8 @@ def all_reduce_tensor(tensor, op=dist.ReduceOp.SUM, world_size=1):
 
     return tensor
 
+# load models from .pth file for prediction, evaluation or 
+# resuming training
 def load_model(model, model_file, is_restore=False):
     t_start = time.time()
     if isinstance(model_file, str):
@@ -69,6 +63,7 @@ def load_model(model, model_file, is_restore=False):
     return model
 
 
+# add parsing on CUDA device
 def parse_devices(input_devices):
     if input_devices.endswith('*'):
         devices = list(range(torch.cuda.device_count()))
