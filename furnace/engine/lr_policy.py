@@ -7,7 +7,7 @@
 
 from abc import ABCMeta, abstractmethod
 
-
+# Poly learning rate scheduler for BiSeNet
 class BaseLR():
     __metaclass__ = ABCMeta
 
