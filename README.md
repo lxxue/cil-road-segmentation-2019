@@ -82,8 +82,6 @@ A handy script (`writefile.py`) using the package [glob](https://docs.python.org
 
 ### Training
 
-Currently, distributed training from `torch.distributed.launch` is not supported.
-
 To specify which CUDA device used for training, one can parse the index to `train.py`
 
 A simple use case using the first CUDA device:
