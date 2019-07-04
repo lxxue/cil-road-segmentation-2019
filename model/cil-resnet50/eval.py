@@ -24,6 +24,7 @@ from sklearn.metrics import mean_squared_error
 from math import sqrt
 
 def img_to_black(img, threshold=50):
+    """Binary filter on greyscale image."""
     img = img.astype(np.int64)
     idx = img[:,:] > threshold
     idx_0 = img[:,:] <= threshold
@@ -44,6 +45,7 @@ def img_to_uint8(img, threshold=0.50, patch_size = 16):
     return img
 
 class SegEvaluator(Evaluator):
+    """Evalation based on RMSE between gt and predicted labels."""
     def func_per_iteration(self, data, device):
         img = data['data']
         label = data['label']
@@ -60,11 +62,6 @@ class SegEvaluator(Evaluator):
                                (config.image_height // config.gt_down_sampling,
                                 config.image_width // config.gt_down_sampling),
                                device)
-#        hist_tmp, labeled_tmp, correct_tmp = hist_info(config.num_classes,
-#                                                       pred,
-#                                                       label)
-#        results_dict = {'hist': hist_tmp, 'labeled': labeled_tmp,
-#                        'correct': correct_tmp}
 
         if self.save_path is not None:
             fn = name + '.png'
@@ -75,6 +72,7 @@ class SegEvaluator(Evaluator):
         return results_dict
 
     def compute_metric(self, results):
+        """Calculate the RMSE per images."""
         count = 0
         rmse = 0
         for d in results:
