@@ -1,3 +1,5 @@
+#use ResNet.py from pytorch.org. Modification for multi-stage output listed below
+
 import functools
 import torch.nn as nn
 
@@ -171,6 +173,7 @@ class ResNet(nn.Module):
         x = self.relu(x)
         x = self.maxpool(x)
 
+        #added blocks for each resblock output
         blocks = []
         x = self.layer1(x);
         blocks.append(x)
