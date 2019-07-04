@@ -14,7 +14,8 @@ from utils import pyt_utils
 _default_level_name = os.getenv('ENGINE_LOGGING_LEVEL', 'INFO')
 _default_level = logging.getLevelName(_default_level_name.upper())
 
-
+# Class for managing display information formatting
+# and save information into log file
 class LogFormatter(logging.Formatter):
     log_fout = None
     date_full = '[%(asctime)s %(lineno)d@%(filename)s:%(name)s] '
