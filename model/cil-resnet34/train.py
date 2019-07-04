@@ -41,13 +41,14 @@ with Engine(custom_parser=parser) as engine:
 
     # data loader
     train_loader, train_sampler = get_train_loader(engine, Cil)
-
+    # use syncBatchNorm if in distributed training
     BatchNorm2d = Bn2D
     if engine.distributed:
         BatchNorm2d = SyncBatchNorm
-
+    # load model
     model = Network_Res34(out_planes=config.num_classes, is_training=True, 
                     BN2D=BatchNorm2d)
+    # initialize parameters
     init_weight(model.layers, nn.init.kaiming_normal_,
                 BatchNorm2d, config.bn_eps, config.bn_momentum,
                 mode='fan_in', nonlinearity='relu')
@@ -56,7 +57,7 @@ with Engine(custom_parser=parser) as engine:
     base_lr = config.lr
     if engine.distributed:
          base_lr = config.lr * engine.world_size
-
+    # group weight initialization on all layers
     params_list = []
     params_list = group_weight(params_list, model.context,
                                BatchNorm2d, base_lr)
@@ -72,9 +73,8 @@ with Engine(custom_parser=parser) as engine:
                                BatchNorm2d, base_lr)
     params_list = group_weight(params_list, model.res_top_refine,
                                BatchNorm2d, base_lr)
-    #params_list = group_weight(params_list, model.conv5,
-                               #BatchNorm2d, base_lr * 10)
 
+    # Use adam optimizer for training
     optimizer = torch.optim.Adam(params_list)
 
 
@@ -82,17 +82,17 @@ with Engine(custom_parser=parser) as engine:
 
 
     model.to(device)
-
+     # model fed during parallel training. 
     if engine.distributed:
         model = DistributedDataParallel(model)
-
+    # register state dictations
     engine.register_state(dataloader=train_loader, model=model,
                           optimizer=optimizer)
     if engine.continue_state_object:
         engine.restore_checkpoint()
 
     model.train()
-
+    # start training process
     for epoch in range(engine.state.epoch, config.nepochs):
         if engine.distributed:
             train_sampler.set_epoch(epoch)
