@@ -1,3 +1,7 @@
+############################################################
+# Image augmentation utility functions file
+############################################################
+
 import cv2
 import numpy as np
 import numbers
@@ -19,7 +23,7 @@ def get_2dshape(shape, *, zero=True):
     assert min(shape) >= minv, 'invalid shape: {}'.format(shape)
     return shape
 
-
+# function for cropping image at position generated with a specific size
 def random_crop_pad_to_shape(img, crop_pos, crop_size, pad_label_value):
     h, w = img.shape[:2]
     start_crop_h, start_crop_w = crop_pos
@@ -37,7 +41,7 @@ def random_crop_pad_to_shape(img, crop_pos, crop_size, pad_label_value):
 
     return img_, margin
 
-
+# function to generate a random position for cropping
 def generate_random_crop_pos(ori_size, crop_size):
     ori_size = get_2dshape(ori_size)
     h, w = ori_size
