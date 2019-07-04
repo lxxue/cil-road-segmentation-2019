@@ -18,6 +18,7 @@ def conv3x3(in_planes, out_planes, stride=1):
 
 class BasicBlock(nn.Module):
     expansion = 1
+    
 
     def __init__(self, inplanes, planes, stride=1, norm_layer=None,
                  bn_eps=1e-5, bn_momentum=0.1, downsample=None, inplace=True):
