@@ -24,6 +24,7 @@ from sklearn.metrics import mean_squared_error
 from math import sqrt
 
 def img_to_black(img, threshold=50):
+    """Binary filter on greyscale image."""
     img = img.astype(np.int64)
     idx = img[:,:] > threshold
     idx_0 = img[:,:] <= threshold
@@ -75,6 +76,7 @@ class SegEvaluator(Evaluator):
         return results_dict
 
     def compute_metric(self, results):
+        """Calculate the RMSE per images."""
         count = 0
         rmse = 0
         for d in results:
