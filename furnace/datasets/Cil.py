@@ -11,7 +11,8 @@ import torch.utils.data as data
 
 
 class Cil(data.Dataset):
-    trans_labels = [0, 1]
+    """data.Dataset class for cil-road-segmentation-2019."""
+    trans_labels = [0, 1] # binary label
 
     def __init__(self, setting, split_name, preprocess=None,
                  file_length=None):
@@ -32,6 +33,7 @@ class Cil(data.Dataset):
         return len(self._file_names)
 
     def __getitem__(self, index):
+        """Retrieve img, gt from directory by index."""
         if self._file_length is not None:
             names = self._construct_new_file_names(self._file_length)[index]
         else:
@@ -67,6 +69,7 @@ class Cil(data.Dataset):
         return output_dict
 
     def _get_file_names(self, split_name):
+        """Obtain filename from tab-separated files."""
         assert split_name in ['train', 'val', 'test']
         source = self._train_source
         if split_name == "val":
@@ -104,8 +107,10 @@ class Cil(data.Dataset):
 
     @classmethod
     def get_class_colors(*args):
+        """color for visualization and saving images."""
         return [[255, 255, 255], [0, 0, 0]]
 
     @classmethod
     def get_class_names(*args):
+        """Label names."""
         return ['road', 'non-road']
