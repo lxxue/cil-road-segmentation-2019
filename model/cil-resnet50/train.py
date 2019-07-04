@@ -73,7 +73,7 @@ with Engine(custom_parser=parser) as engine:
                                BatchNorm2d, base_lr)
     params_list = group_weight(params_list, model.res_top_refine,
                                BatchNorm2d, base_lr)
-
+    # Use adam optimizer for training
     optimizer = torch.optim.Adam(params_list)
 
 
