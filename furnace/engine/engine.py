@@ -12,7 +12,8 @@ from utils.pyt_utils import load_model, parse_devices, extant_file, link_file, \
 
 logger = get_logger()
 
-
+# State dictation class. Register training dictations that helps the
+# Engine class
 class State(object):
     def __init__(self):
         self.epoch = 0
@@ -27,7 +28,8 @@ class State(object):
                          'optimizer']
             setattr(self, k, v)
 
-
+# training processing Engine. It manage whole training process including 
+# distributed training and non-distributed training.
 class Engine(object):
     def __init__(self, custom_parser=None): 
         logger.info(
@@ -58,7 +60,8 @@ class Engine(object):
             self.devices = [i for i in range(self.world_size)]
         else:
             self.devices = parse_devices(self.args.devices)
-
+            
+# Register default arguments 
     def inject_default_parser(self):
         p = self.parser
         p.add_argument('-d', '--devices', default='',
@@ -70,6 +73,7 @@ class Engine(object):
         p.add_argument('--local_rank', default=0, type=int,
                        help='process rank on node')
 
+# Register current state
     def register_state(self, **kwargs):
         self.state.register(**kwargs)
 
@@ -77,6 +81,7 @@ class Engine(object):
         self.state.epoch = epoch
         self.state.iteration = iteration
 
+#function only for saving checkpoint
     def save_checkpoint(self, path):
         logger.info("Saving checkpoint to file {}".format(path))
         t_start = time.time()
@@ -104,7 +109,8 @@ class Engine(object):
             "Save checkpoint to file {}, "
             "Time usage:\n\tprepare snapshot: {}, IO: {}".format(
                 path, t_iobegin - t_start, t_end - t_iobegin))
-
+        
+#Function for saving current training model parameters and create symbolic link under current folder
     def save_and_link_checkpoint(self, snapshot_dir, log_dir, log_dir_link):
         ensure_dir(snapshot_dir)
         if not osp.exists(log_dir_link):
@@ -116,6 +122,8 @@ class Engine(object):
                                          'epoch-last.pth')
         link_file(current_epoch_checkpoint, last_epoch_checkpoint)
 
+#Funtion for continuing training is interrupted        
+        
     def restore_checkpoint(self):
         t_start = time.time()
         if self.distributed:
