@@ -91,6 +91,7 @@ class Cil(data.Dataset):
         return file_names
 
     def _construct_new_file_names(self, length):
+        """Ensure correct name from relative directory"""
         assert isinstance(length, int)
         files_len = len(self._file_names)
         new_file_names = self._file_names * (length // files_len)
@@ -103,6 +104,7 @@ class Cil(data.Dataset):
         return new_file_names
 
     def get_length(self):
+        """Get size of the dataset."""
         return self.__len__()
 
     @classmethod
