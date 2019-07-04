@@ -39,7 +39,7 @@ def group_weight(weight_group, module, norm_layer, lr):
             group_decay.append(m.weight)
             if m.bias is not None:
                 group_no_decay.append(m.bias)
-        elif isinstance(m, (nn.Conv2d, nn.Conv3d)):
+        elif isinstance(m, (nn.Conv2d, nn.Conv3d, nn.ConvTranspose2d)):
             group_decay.append(m.weight)
             if m.bias is not None:
                 group_no_decay.append(m.bias)

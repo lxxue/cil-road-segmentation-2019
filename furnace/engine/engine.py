@@ -7,7 +7,6 @@ import torch
 import torch.distributed as dist
 
 from .logger import get_logger
-from .version import __version__
 from utils.pyt_utils import load_model, parse_devices, extant_file, link_file, \
     ensure_dir
 
@@ -30,11 +29,9 @@ class State(object):
 
 
 class Engine(object):
-    def __init__(self, custom_parser=None):
-        self.version = __version__
+    def __init__(self, custom_parser=None): 
         logger.info(
-            "PyTorch Version {}, Furnace Version {}".format(torch.__version__,
-                                                            self.version))
+            "PyTorch Version {}".format(torch.__version__))
         self.state = State()
         self.devices = None
         self.distributed = False
@@ -150,4 +147,4 @@ class Engine(object):
             logger.warning(
                 "A exception occurred during Engine initialization, "
                 "give up running process")
-return False
+            return False

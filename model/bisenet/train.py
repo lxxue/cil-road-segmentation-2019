@@ -130,6 +130,11 @@ with Engine(custom_parser=parser) as engine:
             pbar.set_description(print_str, refresh=False)
 
         if  epoch % 5 == 0:
-            engine.save_and_link_checkpoint(config.snapshot_dir,
+            if engine.distributed and (engine.local_rank == 0):
+                engine.save_and_link_checkpoint(config.snapshot_dir,
+                                            config.log_dir,
+                                            config.log_dir_link)
+            elif not engine.distributed:
+                engine.save_and_link_checkpoint(config.snapshot_dir,
                                             config.log_dir,
                                             config.log_dir_link)

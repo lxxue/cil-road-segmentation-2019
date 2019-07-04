@@ -25,6 +25,7 @@ class Network_UNet(nn.Module):
                         nn.Dropout2d(),
                         ConvBnRelu(1024, out_planes, 1, 1, 0, has_bn=False, has_relu=True, has_bias=False, norm_layer=BN2D),
                         nn.Dropout2d(),
+                        nn.AdaptiveAvgPool2d(1)
         )
 
         self.up_512 = nn.ConvTranspose2d(out_planes, out_planes, kernel_size=4,stride=2,padding=2, output_padding=1)
@@ -62,7 +63,8 @@ class Network_UNet(nn.Module):
         refine_128 = self.refine_128(resnet_out[2])
         refine_64 = self.refine_64(resnet_out[3])
 
-
+        refine_512 = F.interpolate(refine_512, size=(resnet_out[0].size()[2:]),
+                                mode='bilinear', align_corners=True)
         up_512 = self.up_512(refine_512)
         #print("up_512:", np.shape(up_512))
         #up_512 = up_512[:,:,1:51,1:51]
