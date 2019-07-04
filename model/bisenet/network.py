@@ -1,5 +1,8 @@
 # encoding: utf-8
-
+###############################################################
+# Network inherited from BiSeNet, see README for link of original
+# repo
+###############################################################
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
