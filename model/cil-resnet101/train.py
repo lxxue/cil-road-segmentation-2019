@@ -21,7 +21,6 @@ from utils.init_func import init_weight, group_weight
 from utils.pyt_utils import all_reduce_tensor, load_model
 from engine.lr_policy import PolyLR
 from engine.engine import Engine
-from seg_opr.loss_opr import SigmoidFocalLoss, ProbOhemCrossEntropy2d
 from apex.parallel import DistributedDataParallel, SyncBatchNorm
 
 
