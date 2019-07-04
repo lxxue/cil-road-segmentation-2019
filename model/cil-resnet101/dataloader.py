@@ -8,6 +8,7 @@ from utils.img_utils import random_scale, random_mirror, normalize, \
     generate_random_crop_pos, random_crop_pad_to_shape
 
 def img_to_black(img, threshold=50):
+    """Binary filter on greyscale image."""
     img = img.astype(np.int64)
     idx = img[:, :] > threshold
     idx_0 = img[:, :] <= threshold
@@ -16,26 +17,28 @@ def img_to_black(img, threshold=50):
     return img
 
 class TrainPre(object):
+    """pre-processing on train set."""
     def __init__(self, img_mean, img_std):
         self.img_mean = img_mean
         self.img_std = img_std
 
     def __call__(self, img, gt):
-        img, gt = random_mirror(img, gt)
+        img, gt = random_mirror(img, gt) # flip image at random
 
         gt = img_to_black(gt)
 
         if config.train_scale_array is not None:
-            img, gt, scale = random_scale(img, gt, config.train_scale_array)
+            img, gt, scale = random_scale(img, gt, config.train_scale_array) # scale the image at random
 
         img = normalize(img, self.img_mean, self.img_std)
 
         crop_size = (200, 200)
         crop_pos = generate_random_crop_pos(img.shape[:2], crop_size)
 
-        p_img, _ = random_crop_pad_to_shape(img, crop_pos, crop_size, 0)
-        p_gt, _ = random_crop_pad_to_shape(gt, crop_pos, crop_size, 255) # value=
+        p_img, _ = random_crop_pad_to_shape(img, crop_pos, crop_size, 0) # resize cropped images
+        p_gt, _ = random_crop_pad_to_shape(gt, crop_pos, crop_size, 255)
 
+        # add resize for down sampling
         p_img = cv2.resize(p_img, (config.image_width // config.gt_down_sampling,
                                  config.image_height // config.gt_down_sampling),
                           interpolation=cv2.INTER_NEAREST)
@@ -89,6 +92,7 @@ def get_train_loader(engine, dataset):
     train_dataset_no_crop = dataset(data_setting, 'train', train_preprocess_no_crop,
                                     config.batch_size * config.niters_per_epoch)
 
+    # combine two dataset
     train_dataset = data.ConcatDataset([train_dataset,
             train_dataset_no_crop])
 
@@ -96,6 +100,7 @@ def get_train_loader(engine, dataset):
     is_shuffle = True
     batch_size = config.batch_size
     
+    # add distributed 
     if engine.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(
             train_dataset)
