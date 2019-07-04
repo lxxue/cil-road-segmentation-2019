@@ -15,7 +15,8 @@ from utils.img_utils import pad_image_to_shape, normalize
 
 logger = get_logger()
 
-
+# Evaluator class manage whole evaluation process with distributed processing
+# and non-distributed processing
 class Evaluator(object):
     def __init__(self, dataset, class_num, image_mean, image_std, network,
                  multi_scales, is_flip, devices,
@@ -39,6 +40,7 @@ class Evaluator(object):
         if save_path is not None:
             ensure_dir(save_path)
 
+    # Function for running evaluation process
     def run(self, model_path, model_indice, log_file, log_file_link):
         """Evaluate models."""
         if '.pth' in model_indice:
@@ -62,6 +64,7 @@ class Evaluator(object):
 
         results.close()
 
+    # multi-device distributed processing if the dataset is too large
     def multi_process_evaluation(self):
         start_eval_time = time.perf_counter()
         nr_devices = len(self.devices)
@@ -109,11 +112,13 @@ class Evaluator(object):
 
     def func_per_iteration(self, data, device):
         raise NotImplementedError
-
+    
+    # inherited from eval.py 
     def compute_metric(self, results):
         raise NotImplementedError
 
-    # evaluate the whole image at once
+    # function for evaluating the whole image at once and select the most 
+    # probable prediction amongst all. 
     def whole_eval(self, img, output_size, input_size=None, device=None):
         if input_size is not None:
             img, margin = self.process_image(img, input_size)
@@ -135,6 +140,7 @@ class Evaluator(object):
 
         return pred
 
+    # function for loading image into model and form prediction 
     def val_func_process(self, input_data, device=None):
         input_data = np.ascontiguousarray(input_data[None, :, :, :],
                                           dtype=np.float32)
@@ -156,7 +162,8 @@ class Evaluator(object):
                 # score = score.data
 
         return score
-
+    
+    # function for input image munipulation to correct dimension. 
     def process_image(self, img, crop_size=None):
         p_img = img
 
