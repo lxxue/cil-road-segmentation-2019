@@ -44,7 +44,7 @@ class SegEvaluator(Evaluator):
         return results_dict
 
     def compute_metric(self, results):
-        'No metric is calculated during prediction.'
+        """No metric is calculated during prediction."""
         return 'no result'
 
 
