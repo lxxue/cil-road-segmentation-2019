@@ -1,3 +1,7 @@
+#############################################
+#Score computation file inherited from BiSeNet
+#############################################
+
 # encoding: utf-8
 
 import numpy as np
