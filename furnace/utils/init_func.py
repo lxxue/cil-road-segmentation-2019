@@ -1,9 +1,7 @@
-#!/usr/bin/env python3
-# encoding: utf-8
-# @Time    : 2018/9/28 下午12:13
-# @Author  : yuchangqian
-# @Contact : changqian_yu@163.com
-# @File    : init_func.py.py
+####################################################################
+# Function for group initialization of all layers, used in train.py
+# during training process
+####################################################################
 import torch
 import torch.nn as nn
 
