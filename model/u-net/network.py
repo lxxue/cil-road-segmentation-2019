@@ -17,9 +17,9 @@ class Network_UNet(nn.Module):
         self.layers = []
         
         conv_channel = 128
-        
+        # base model of resnet 18 from resnet.py
         self.resnet = resnet18(pretrained_model=None, norm_layer=BN2D, bn_eps=config.bn_eps, bn_momentum=config.bn_momentum, deep_stem=False, stem_width=64)
-
+        # tail refinement on FCN style contraction path
         self.refine_512 = nn.Sequential(
                         ConvBnRelu(512, 1024, 7, 1, 3, has_bn=False, has_relu=True, has_bias=False, norm_layer=BN2D),
                         nn.Dropout2d(),
@@ -27,14 +27,15 @@ class Network_UNet(nn.Module):
                         nn.Dropout2d(),
                         nn.AdaptiveAvgPool2d(1)
         )
-
-        self.up_512 = nn.ConvTranspose2d(out_planes, out_planes, kernel_size=4,stride=2,padding=2, output_padding=1)
         
+        # upscale using Transpose convolution
+        self.up_512 = nn.ConvTranspose2d(out_planes, out_planes, kernel_size=4,stride=2,padding=2, output_padding=1)
+        # Refinement on intermediate layers in FCN style structure
         self.refine_256 = ConvBnRelu(256, out_planes, 1, 1, 0, has_bn=False, has_relu=False, has_bias=False, norm_layer=BN2D)
         self.refine_128 = ConvBnRelu(128, out_planes, 1, 1, 0, has_bn=False, has_relu=False, has_bias=False, norm_layer=BN2D)
         self.refine_64 = ConvBnRelu(64, out_planes, 1, 1, 0, has_bn=False, has_relu=False, has_bias=False, norm_layer=BN2D) 
         
-
+        # upscale using Transpose convolution
         self.up_256 = nn.ConvTranspose2d(out_planes, out_planes, kernel_size=4,stride=2,padding=1)
         self.up_128 = nn.ConvTranspose2d(out_planes, out_planes, kernel_size=4,stride=2,padding=1)
 
@@ -66,26 +67,15 @@ class Network_UNet(nn.Module):
         refine_512 = F.interpolate(refine_512, size=(resnet_out[0].size()[2:]),
                                 mode='bilinear', align_corners=True)
         up_512 = self.up_512(refine_512)
-        #print("up_512:", np.shape(up_512))
-        #up_512 = up_512[:,:,1:51,1:51]
-        #print("up_512:", np.shape(up_512))
-        #print("refine_256:", np.shape(refine_256))
+
         fuse_8 = up_512 + refine_256
         up_256 = self.up_256(fuse_8)
-        #up_256 = up_256[:,:,1:101,1:101]
+
         fuse_4 = up_256 + refine_128
         up_128 = self.up_128(fuse_4)
-        #up_128 = up_128[:,:,1:201,1:201]
         fuse_2 = up_128 + refine_64
         result = self.up_final(fuse_2)
-        #result = result[:,:,1:401,1:401]
 
-        #for i, (fm,refine) in enumerate(zip(context_out[:4],self.refines)):
-        #    last = torch.cat([fm, last],dim=1)
-        #    last = refine(last)
-        #    last = F.interpolate(last, scale_factor=2, mode='nearest')#,align_corners=True)
-      
-        #x = self.class_refine(last)
         
         if self.is_training:
             loss = self.loss(result,gt)
