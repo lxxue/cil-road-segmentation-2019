@@ -18,12 +18,14 @@ import os
 # dirname = "zhang-suen-thinning/midlines/"
 # fnames = sorted(os.listdir(dirname))
 # out_fname = "midlines.txt"
-dirname = "test_images/"
-out_fname = "test.txt"
-fnames = sorted(os.listdir(dirname))
+img_dir = "training/images/"
+gt_dir = "training/groundtruth/"
+edge_dir = "zhang-suen-thinning/edges/"
+midline_dir = "zhang-suen-thinning/midlines/"
+out_fname = "train_edge_midline.txt"
+fnames = sorted(os.listdir(img_dir))
 with open(out_fname, 'w') as out:
      for f in fnames:
-         f = dirname + f
-         out.write("{}\n".format(f))
+         out.write("{}\t{}\t{}\t{}\n".format(img_dir+f, gt_dir+f, edge_dir+f, midline_dir+f))
     
 

@@ -75,23 +75,32 @@ def pad_image_to_shape(img, shape, border_mode, value):
 
     return img, margin
 
-def random_scale(img, gt, scales):
+def random_scale(img, gt, scales, edge=None, midline=None):
     scale = random.choice(scales)
     sh = int(img.shape[0] * scale)
     sw = int(img.shape[1] * scale)
     img = cv2.resize(img, (sw, sh), interpolation=cv2.INTER_LINEAR)
     gt = cv2.resize(gt, (sw, sh), interpolation=cv2.INTER_NEAREST)
+    if edge is not None:
+        edge = cv2.resize(edge, (sw, sh), interpolation=cv2.INTER_LINEAR)
+        midline = cv2.resize(midline, (sw, sh), interpolation=cv2.INTER_NEAREST)
+        return img, gt, scale, edge, midline
 
     return img, gt, scale
 
 
-def random_mirror(img, gt):
+def random_mirror(img, gt, edge=None, midline=None):
     if random.random() >= 0.5:
         img = cv2.flip(img, 1)
         gt = cv2.flip(gt, 1)
+        if edge is not None:
+            edge = cv2.flip(edge, 1)
+            midline = cv2.flip(midline, 1)
+    
+    if edge is not None:
+        return img, gt, edge, midline
 
     return img, gt
-
 
 def normalize(img, mean, std):
     # pytorch pretrained model need the input range: 0-1
