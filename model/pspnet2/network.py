@@ -95,6 +95,9 @@ class PSPNet(nn.Module):
         self.business_layer.append(self.side_centerline_conv4)
         self.business_layer.append(self.fuse_centerline_conv)
 
+        self.edge_criterion = nn.CrossEntropyLoss(reduction='mean', ignore_index=-1, weight=torch.Tensor([0.015, 0.985]))
+        self.centerline_criterion = nn.CrossEntropyLoss(reduction='mean', ignore_index=-1, weight=torch.Tensor([0.01, 0.99]))
+
 
     def _edge_forward(self, x):
         """
@@ -167,17 +170,17 @@ class PSPNet(nn.Module):
         edge_fm = self._edge_forward(x)[-1]
         centerline_fm = self._centerline_forward(x)[-1]
 
-        psp_fm = F.log_softmax(psp_fm, dim=1)
-        aux_fm = F.log_softmax(aux_fm, dim=1)
-        edge_fm = F.log_softmax(edge_fm)
-        centerline_fm = F.log_softmax(centerline_fm)
+        # psp_fm = F.log_softmax(psp_fm, dim=1)
+        # aux_fm = F.log_softmax(aux_fm, dim=1)
+        # edge_fm = F.log_softmax(edge_fm)
+        # centerline_fm = F.log_softmax(centerline_fm)
 
         if label is not None:
             # print(label.min(), label.max())
             loss = self.criterion(psp_fm, label)
             aux_loss = self.criterion(aux_fm, label)
-            edge_loss = self.criterion(edge_fm, edge_label) 
-            centerline_loss = self.criterion(centerline_fm, centerline_label)
+            edge_loss = self.edge_criterion(edge_fm, edge_label) 
+            centerline_loss = self.centerline_criterion(centerline_fm, centerline_label)
             print("loss: {:.3f} {:.3f} {:.3f} {:.3f}".format(loss.item(), aux_loss.item(), edge_loss.item(), centerline_loss.item()))
             loss = loss + 0.4 * aux_loss + 0.2 * edge_loss + 0.2 * centerline_loss
             return loss
