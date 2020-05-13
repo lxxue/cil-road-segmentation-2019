@@ -8,7 +8,7 @@ import os
 import sys
 import logging
 
-from utils import pyt_utils
+# from utils import pyt_utils
 # from utils.pyt_utils import ensure_dir
 
 _default_level_name = os.getenv('ENGINE_LOGGING_LEVEL', 'INFO')
@@ -79,6 +79,9 @@ class LogFormatter(logging.Formatter):
     def _color_date(msg):
         return '\x1b[32m{}\x1b[0m'.format(msg)
 
+def ensure_dir(path):
+    if not os.path.isdir(path):
+        os.makedirs(path)
 
 def get_logger(log_dir=None, log_file=None, formatter=LogFormatter):
     logger = logging.getLogger()
@@ -86,7 +89,7 @@ def get_logger(log_dir=None, log_file=None, formatter=LogFormatter):
     del logger.handlers[:]
 
     if log_dir and log_file:
-        pyt_utils.ensure_dir(log_dir)
+        ensure_dir(log_dir)
         LogFormatter.log_fout = True
         file_handler = logging.FileHandler(log_file, mode='a')
         file_handler.setLevel(logging.INFO)

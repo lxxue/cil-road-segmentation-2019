@@ -56,6 +56,7 @@ class Network_UNet(nn.Module):
         self.loss = nn.CrossEntropyLoss(reduction='mean', ignore_index=255)	
         
     def forward(self, x, gt=None):
+        print(x.shape)
         resnet_out = self.resnet(x)
         resnet_out.reverse()
         

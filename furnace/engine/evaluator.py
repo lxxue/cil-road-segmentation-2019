@@ -136,7 +136,8 @@ class Evaluator(object):
                               (output_size[1], output_size[0]),
                               interpolation=cv2.INTER_LINEAR)
 
-        pred = pred.argmax(2)
+        # pred = pred.argmax(2)
+        pred = pred[:, :, 1]
 
         return pred
 
