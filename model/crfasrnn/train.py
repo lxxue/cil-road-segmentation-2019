@@ -37,12 +37,15 @@ with Engine(custom_parser=parser) as engine:
     
     # load model    
     criterion = nn.CrossEntropyLoss(reduction='mean',
-                                    ignore_index=-1)
+                                    ignore_index=255)
     model = CrfRnnNet(config.num_classes, criterion=criterion,
                pretrained_model=config.pretrained_model,
                norm_layer=BatchNorm2d, n_iter=5)
+    #`n_iter=5`: during training, we set the number of mean-field iterations T in the CRF-RNN to 5
     base_lr = config.lr
     
+    # todo: base_weights for init
+
     # initialize parameters
     init_weight(model.psp.business_layer, nn.init.kaiming_normal_,
                 BatchNorm2d, config.bn_eps, config.bn_momentum,
@@ -58,9 +61,13 @@ with Engine(custom_parser=parser) as engine:
         params_list = group_weight(params_list, module, BatchNorm2d,
                                    base_lr * 10)
     params_list.append(
-        dict(params=list(model.crfrnn.parameters()), weight_decay=.0, lr=base_lr)) #todo
+        dict(params=list(model.crfrnn.parameters()), weight_decay=config.weight_decay, lr=base_lr)) #todo
 
-    optimizer = torch.optim.Adam(params_list)
+    # optimizer = torch.optim.Adam(params_list)
+    optimizer = torch.optim.SGD(params_list,
+                                lr=base_lr,
+                                momentum=config.momentum,
+                                weight_decay=config.weight_decay)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
