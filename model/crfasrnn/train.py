@@ -43,13 +43,16 @@ with Engine(custom_parser=parser) as engine:
                norm_layer=BatchNorm2d, n_iter=5)
     #`n_iter=5`: during training, we set the number of mean-field iterations T in the CRF-RNN to 5
     base_lr = config.lr
-    
-    # todo: base_weights for init
 
     # initialize parameters
-    init_weight(model.psp.business_layer, nn.init.kaiming_normal_,
-                BatchNorm2d, config.bn_eps, config.bn_momentum,
-                mode='fan_in', nonlinearity='relu')
+    ptr_model_pth = "./PSP_epoch-75.pth"
+    ptr_dict = torch.load(ptr_model_pth, map_location='cpu')['model']
+    psp_dict = model.psp.state_dict()
+    ptr_dict = {k: v for k, v in ptr_dict.items() if k in psp_dict}
+    model.psp.load_state_dict(ptr_dict)
+    # init_weight(model.psp.business_layer, nn.init.kaiming_normal_,
+    #             BatchNorm2d, config.bn_eps, config.bn_momentum,
+    #             mode='fan_in', nonlinearity='relu')
 
     
     # group weight initialization on all layers
